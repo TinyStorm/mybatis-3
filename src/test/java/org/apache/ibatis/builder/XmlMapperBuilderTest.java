@@ -19,6 +19,7 @@ import static com.googlecode.catchexception.apis.BDDCatchException.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class XmlMapperBuilderTest {
+
+  @Test
+  void wmTest() throws IOException {
+    Configuration configuration = new Configuration();
+    String resource = "org/apache/ibatis/builder/PostMapper.xml";
+    try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+      XMLMapperBuilder builder = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
+      builder.parse();
+    }
+  }
 
   @Test
   void shouldSuccessfullyLoadXMLMapperFile() throws Exception {

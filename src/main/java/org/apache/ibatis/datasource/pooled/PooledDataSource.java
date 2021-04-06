@@ -487,6 +487,7 @@ public class PooledDataSource implements DataSource {
         if (conn != null) {
           // ping to server and check the connection is valid or not
           if (conn.isValid()) {
+            //获取连接时候 如果发现该连接不是自动提交的，则将其回滚
             if (!conn.getRealConnection().getAutoCommit()) {
               conn.getRealConnection().rollback();
             }
