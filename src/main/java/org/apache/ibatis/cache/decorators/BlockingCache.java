@@ -93,6 +93,7 @@ public class BlockingCache implements Cache {
       if (latch == null) {
         break;
       }
+      //获取上一个线程的枷锁对象,并等待最大秒数,当上一个线程countdown掉之后,则视为加锁成功
       try {
         if (timeout > 0) {
           boolean acquired = latch.await(timeout, TimeUnit.MILLISECONDS);

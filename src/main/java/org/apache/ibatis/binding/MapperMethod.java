@@ -180,6 +180,7 @@ public class MapperMethod {
   private <E> Object convertToArray(List<E> list) {
     Class<?> arrayComponentType = method.getReturnType().getComponentType();
     Object array = Array.newInstance(arrayComponentType, list.size());
+    //为什么基本类型需要一个一个set
     if (arrayComponentType.isPrimitive()) {
       for (int i = 0; i < list.size(); i++) {
         Array.set(array, i, list.get(i));
@@ -256,6 +257,7 @@ public class MapperMethod {
       String statementId = mapperInterface.getName() + "." + methodName;
       if (configuration.hasStatement(statementId)) {
         return configuration.getMappedStatement(statementId);
+        //如果是当前接口定义,则直接返回空,否则去父接口继续查找
       } else if (mapperInterface.equals(declaringClass)) {
         return null;
       }

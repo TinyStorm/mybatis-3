@@ -100,6 +100,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       }
 
       return methodCache.computeIfAbsent(method, m -> {
+        //如果是default方法,则不进行sql代理
         if (m.isDefault()) {
           try {
             if (privateLookupInMethod == null) {
