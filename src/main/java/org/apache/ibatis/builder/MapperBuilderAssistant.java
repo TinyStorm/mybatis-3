@@ -408,6 +408,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return resultMaps;
   }
 
+  /**
+   * build没个字段的映射
+   */
   public ResultMapping buildResultMapping(
       Class<?> resultType,
       String property,
@@ -526,12 +529,15 @@ public class MapperBuilderAssistant extends BaseBuilder {
   }
 
   private Class<?> resolveResultJavaType(Class<?> resultType, String property, Class<?> javaType) {
+    //build字段映射时候,如果字段值不为空,那么从上级获取
     if (javaType == null && property != null) {
       try {
         MetaClass metaResultType = MetaClass.forClass(resultType, configuration.getReflectorFactory());
         javaType = metaResultType.getSetterType(property);
       } catch (Exception e) {
         // ignore, following null check statement will deal with the situation
+        // 如果上级携带的resultType为空,那么可能是collection类型的嵌套,则将由下面空判断去处理,将认为该字段类型是Object
+        // 所以如果是collection的匿名嵌套,那么必须显式指定字段的javaType
       }
     }
     if (javaType == null) {

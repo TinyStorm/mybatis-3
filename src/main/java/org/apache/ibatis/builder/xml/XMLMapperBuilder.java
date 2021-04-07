@@ -262,8 +262,8 @@ public class XMLMapperBuilder extends BaseBuilder {
             resultMapNode.getStringAttribute("resultType",
                 resultMapNode.getStringAttribute("javaType"))));
     Class<?> typeClass = resolveClass(type);
-    //如果没解析到当前节点的type,则继承上一层携带的type
     if (typeClass == null) {
+      //如果没解析到当前节点的type,则继承上一层携带的type(不是简单的等于)
       typeClass = inheritEnclosingType(resultMapNode, enclosingType);
     }
     Discriminator discriminator = null;
@@ -312,6 +312,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       //如果case下级还包含嵌套的类型,则将回到resultMapElement()继续解析
       return enclosingType;
     }
+    //而如果是collection或者其他(当然目前就只有 association collection case 三种节点会当成resultMap解析),则直接返回空
     return null;
   }
 
