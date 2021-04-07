@@ -45,6 +45,10 @@ public class ResultMap {
   private List<ResultMapping> propertyResultMappings;
   private Set<String> mappedColumns;
   private Set<String> mappedProperties;
+  /**
+   * 每一个resultMap只有一个甄别器,
+   * 如果有多个,则两个甄别器都满足的情况下,无法处理
+   */
   private Discriminator discriminator;
   private boolean hasNestedResultMaps;
   private boolean hasNestedQueries;

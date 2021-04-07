@@ -262,6 +262,7 @@ public class XMLMapperBuilder extends BaseBuilder {
             resultMapNode.getStringAttribute("resultType",
                 resultMapNode.getStringAttribute("javaType"))));
     Class<?> typeClass = resolveClass(type);
+    //如果没解析到当前节点的type,则继承上一层携带的type
     if (typeClass == null) {
       typeClass = inheritEnclosingType(resultMapNode, enclosingType);
     }
@@ -296,13 +297,19 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   protected Class<?> inheritEnclosingType(XNode resultMapNode, Class<?> enclosingType) {
+    //如果是一对一嵌套的匿名 resultMap
     if ("association".equals(resultMapNode.getName()) && resultMapNode.getStringAttribute("resultMap") == null) {
       String property = resultMapNode.getStringAttribute("property");
       if (property != null && enclosingType != null) {
+        //获取上级类型的setter参数类型 即 一对一肯定会生成一个嵌套的子对象,如果没有声明该对象的类型,那也不能直接
+        //使用上级的类型,需要根据上级类型和该字段名称解析该属性的类型
         MetaClass metaResultType = MetaClass.forClass(enclosingType, configuration.getReflectorFactory());
         return metaResultType.getSetterType(property);
       }
     } else if ("case".equals(resultMapNode.getName()) && resultMapNode.getStringAttribute("resultMap") == null) {
+      //如果是甄别器的case,则直接返回上级类型,交给case的下级去解析
+      //如果case是直接设置当前类型的值,则可以使用当前类型
+      //如果case下级还包含嵌套的类型,则将回到resultMapElement()继续解析
       return enclosingType;
     }
     return null;
@@ -331,6 +338,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     Map<String, String> discriminatorMap = new HashMap<>();
     for (XNode caseChild : context.getChildren()) {
       String value = caseChild.getStringAttribute("value");
+      //如果子节点有直接声明resultMap,则使用该resultMap,如果没有声明resultMap,则构建并使用匿名resultMap
       String resultMap = caseChild.getStringAttribute("resultMap", processNestedResultMappings(caseChild, resultMappings, resultType));
       discriminatorMap.put(value, resultMap);
     }
@@ -409,7 +417,9 @@ public class XMLMapperBuilder extends BaseBuilder {
         && context.getStringAttribute("select") == null) {
       //如果是集合,则需要验证一下父类里有没有该集合属性的set方法
       validateCollection(context, enclosingType);
-      //从头开始
+      //从头开始 当成一个resultMap处理
+      //所以说 只要有collection association case 必定认为他是一个resultMap,不管他是否是会生成一个多个子对象(一对一(多))
+      //或是仅仅是设置当前类的属性
       ResultMap resultMap = resultMapElement(context, resultMappings, enclosingType);
       return resultMap.getId();
     }
