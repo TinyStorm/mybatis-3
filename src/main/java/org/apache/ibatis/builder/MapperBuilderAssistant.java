@@ -240,7 +240,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
     return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
   }
-
+  /**
+   * id为statement的id,方法内部一定会拼接上接口名称(namespace.)
+   */
   public MappedStatement addMappedStatement(
       String id,
       SqlSource sqlSource,
@@ -266,7 +268,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     if (unresolvedCacheRef) {
       throw new IncompleteElementException("Cache-ref not yet resolved");
     }
-
+    //那为什么不在外面加好了呢
     id = applyCurrentNamespace(id, false);
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
 
