@@ -24,7 +24,9 @@ import org.apache.ibatis.session.Configuration;
  * @author Clinton Begin
  */
 public class WhereSqlNode extends TrimSqlNode {
-
+  /**
+   * where可以实现自动加where和自定删除 and or
+   */
   private static List<String> prefixList = Arrays.asList("AND ","OR ","AND\n", "OR\n", "AND\r", "OR\r", "AND\t", "OR\t");
 
   public WhereSqlNode(Configuration configuration, SqlNode contents) {

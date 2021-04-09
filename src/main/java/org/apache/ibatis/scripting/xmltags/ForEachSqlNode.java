@@ -90,6 +90,8 @@ public class ForEachSqlNode implements SqlNode {
   }
 
   private void applyIndex(DynamicContext context, Object o, int i) {
+    //绑定index和用户参数值(该参数是考虑底层叶子结点可能会使用到,每次循环会覆盖掉上次的值,当叶子结点处理完后,apply方法最后会将此参数移除)
+    //绑定frch_index_1和用户参数值,每次循环会将数字+1,注意该数字从0开始递增
     if (index != null) {
       context.bind(index, o);
       context.bind(itemizeItem(index, i), o);
@@ -97,6 +99,8 @@ public class ForEachSqlNode implements SqlNode {
   }
 
   private void applyItem(DynamicContext context, Object o, int i) {
+    //绑定item和用户参数值(该参数是考虑底层叶子结点可能会使用到,每次循环会覆盖掉上次的值,当叶子结点处理完后,apply方法最后会将此参数移除)
+    //绑定frch_item_1和用户参数值,每次循环会将数字+1注意该数字从0开始递增
     if (item != null) {
       context.bind(item, o);
       context.bind(itemizeItem(item, i), o);
@@ -151,8 +155,10 @@ public class ForEachSqlNode implements SqlNode {
     @Override
     public void appendSql(String sql) {
       GenericTokenParser parser = new GenericTokenParser("#{", "}", content -> {
+        //首先根据item去尝试替换
         String newContent = content.replaceFirst("^\\s*" + item + "(?![^.,:\\s])", itemizeItem(item, index));
         if (itemIndex != null && newContent.equals(content)) {
+          //如果itemIndex不为空且新旧的sql相同,说明没有替换到,则是用参数是index表示的
           newContent = content.replaceFirst("^\\s*" + itemIndex + "(?![^.,:\\s])", itemizeItem(itemIndex, index));
         }
         return "#{" + newContent + "}";
