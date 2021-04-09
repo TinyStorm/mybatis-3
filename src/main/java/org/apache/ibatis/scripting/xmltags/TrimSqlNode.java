@@ -110,6 +110,8 @@ public class TrimSqlNode implements SqlNode {
 
     @Override
     public void appendSql(String sql) {
+      //下级MixedNode调用的时候会将sql append到临时buffer中
+      //applyAll执行到最后一行,才会调用delegate的append,将sql填充到上下文中
       sqlBuffer.append(sql);
     }
 
@@ -119,10 +121,12 @@ public class TrimSqlNode implements SqlNode {
     }
 
     private void applyPrefix(StringBuilder sql, String trimmedUppercaseSql) {
+      //只操作一次
       if (!prefixApplied) {
         prefixApplied = true;
         if (prefixesToOverride != null) {
           for (String toRemove : prefixesToOverride) {
+            //仅仅会删除一次,因为如果trimmedUppercaseSql以A开头,那么肯定不会以B开头
             if (trimmedUppercaseSql.startsWith(toRemove)) {
               sql.delete(0, toRemove.trim().length());
               break;

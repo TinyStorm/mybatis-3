@@ -29,13 +29,17 @@ import org.apache.ibatis.builder.BuilderException;
 public class ExpressionEvaluator {
 
   public boolean evaluateBoolean(String expression, Object parameterObject) {
+    //此处封装了Ognl的api,Ognl不仅仅是获取表达式字段的值,还可以计算表达式 如 {a.b=='b'}将返回属性a的属性b是否等于'b'
     Object value = OgnlCache.getValue(expression, parameterObject);
+    //如果参数是boolean 直接返回true false
     if (value instanceof Boolean) {
       return (Boolean) value;
     }
+    //如果value是数字,则比较参数和0的大小并返回结果
     if (value instanceof Number) {
       return new BigDecimal(String.valueOf(value)).compareTo(BigDecimal.ZERO) != 0;
     }
+    //否则返回是否不为空
     return value != null;
   }
 
