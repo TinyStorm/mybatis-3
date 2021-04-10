@@ -28,7 +28,12 @@ class ParameterExpressionTest {
     Assertions.assertEquals(1, result.size());
     Assertions.assertEquals("id", result.get("property"));
   }
-
+  @Test
+  void propertyWithDot() {
+    Map<String, String> result = new ParameterExpression("author.id");
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("author.id", result.get("property"));
+  }
   @Test
   void propertyWithSpacesInside() {
     Map<String, String> result = new ParameterExpression(" with spaces ");

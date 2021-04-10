@@ -84,11 +84,13 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
+      //读取到一个#{item}之后 将
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }
 
     private ParameterMapping buildParameterMapping(String content) {
+      //将#{name,javaType=String,jdbcType=VARCHAR,typeHandler=TestHandler} 也就是说可以动态指定上述参数
       Map<String, String> propertiesMap = parseParameterMapping(content);
       String property = propertiesMap.get("property");
       Class<?> propertyType;

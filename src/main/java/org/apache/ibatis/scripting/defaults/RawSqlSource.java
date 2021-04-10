@@ -33,7 +33,9 @@ import org.apache.ibatis.session.Configuration;
  * @author Eduardo Macarron
  */
 public class RawSqlSource implements SqlSource {
-
+  /**
+   * 初始化时候赋值解析后生成的StaticSqlSource
+   */
   private final SqlSource sqlSource;
 
   public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType) {
@@ -43,10 +45,12 @@ public class RawSqlSource implements SqlSource {
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> clazz = parameterType == null ? Object.class : parameterType;
+    //RawSqlSource初始化时候会调用SqlSourceBuilder的parse方法,解析用户参数#{},并封装成映射对象(DynamicSqlSource则在调用BoundSql也就是MapStatement真正执行sql的时候解析)
     sqlSource = sqlSourceParser.parse(sql, clazz, new HashMap<>());
   }
 
   private static String getSql(Configuration configuration, SqlNode rootSqlNode) {
+    //静态sql可以不用依赖用户输入的参数就可以解析
     DynamicContext context = new DynamicContext(configuration, null);
     rootSqlNode.apply(context);
     return context.getSql();
@@ -54,6 +58,7 @@ public class RawSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+    //调用StaticSqlSource的getBoundSql()
     return sqlSource.getBoundSql(parameterObject);
   }
 

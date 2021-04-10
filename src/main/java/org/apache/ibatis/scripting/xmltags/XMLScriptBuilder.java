@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2019 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.scripting.xmltags;
 
@@ -30,6 +30,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * SqlNode的解析过程(parseDynamicTags方法)
+ * 1.解析select、delete、update、insert标签下的所有子节点(包含text节点)
+ * 2.遇到text-node 生成TextSqlNode,并判断是否为动态sql
+ * 3.遇到标签类型的node则根据不同的标签选取不同的标签handler并处理,其中不同的handler处理大同小异,稍后分析(handleNode)
+ * 4.标签handler都会返回对应的SqlNode(其中OtherwiseHandler会返回MixedSqlNode,因为Otherwise本身没有处理逻辑,
+ *   其仅仅是ChooseNode的默认逻辑,不需要特殊处理也没有对应的SqlNode实现)
+ * 5.将2和4步骤生成的全部SqlNode作为contents并生成MixedSqlNode
+ * 6.返回该SqlNode,即为整个语句的SqlNode
+ *
+ * 3.1.handler中首先会调用parseDynamicTags,递归解析当点的子节点,认为该节点是一个全新的节点,
+ *     说明可以包含任何子节点(Choose除外,该节点比较特殊,只能包含when和otherwise)
+ * 3.2.解析完子节点后,会在各自当前方法(handleNode)中加上各自标签的特殊属性,如Foreach的open,close,item...
+ *     返回对应的SqlNode
+ *
  * @author Clinton Begin
  */
 public class XMLScriptBuilder extends BaseBuilder {
