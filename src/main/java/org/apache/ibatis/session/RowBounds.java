@@ -16,6 +16,7 @@
 package org.apache.ibatis.session;
 
 /**
+ * 逻辑分页对象
  * @author Clinton Begin
  */
 public class RowBounds {
