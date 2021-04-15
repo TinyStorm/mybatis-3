@@ -62,14 +62,19 @@ public class XMLIncludeTransformer {
     if ("include".equals(source.getNodeName())) {
       Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);
       Properties toIncludeContext = getVariablesContext(source, variablesContext);
+      //递归处理toInclude节点,因为sql片段也有可能引入其他sql片段
       applyIncludes(toInclude, toIncludeContext, true);
+      //如果sql片段和查询不在同一个文件,则引入进来
       if (toInclude.getOwnerDocument() != source.getOwnerDocument()) {
         toInclude = source.getOwnerDocument().importNode(toInclude, true);
       }
+      //将include节点替换为sql节点
       source.getParentNode().replaceChild(toInclude, source);
+      //将子节点移动到该节点之前(文本节点同样是子节点)
       while (toInclude.hasChildNodes()) {
         toInclude.getParentNode().insertBefore(toInclude.getFirstChild(), toInclude);
       }
+      //最后移除空的sql标签
       toInclude.getParentNode().removeChild(toInclude);
     } else if (source.getNodeType() == Node.ELEMENT_NODE) {
       if (included && !variablesContext.isEmpty()) {
