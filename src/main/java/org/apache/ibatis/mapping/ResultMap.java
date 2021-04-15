@@ -39,6 +39,10 @@ public class ResultMap {
 
   private String id;
   private Class<?> type;
+  /**
+   * 如果是构建的匿名ResultMap,则将包含上一级的所有映射mapping
+   * 否则仅仅包含当前resultMap中定义的映射mapping
+   */
   private List<ResultMapping> resultMappings;
   private List<ResultMapping> idResultMappings;
   private List<ResultMapping> constructorResultMappings;
