@@ -439,6 +439,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     } else {
       final ResultLoaderMap lazyLoader = new ResultLoaderMap();
       rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
+      //有自定义handler则不处理
       if (rowValue != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
         final MetaObject metaObject = configuration.newMetaObject(rowValue);
         boolean foundValues = this.useConstructorMappings;
@@ -463,6 +464,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     ancestorObjects.put(resultMapId, resultObject);
   }
 
+  /**
+   * @param isNested 如果是有嵌套的映射,则需要看下是否完全映射还是映射当前
+   * @return 如果含有嵌套,且行为不是FULL,则mybatis只映射显式声明的result,即方法返回false,不执行自动映射
+   */
   private boolean shouldApplyAutomaticMappings(ResultMap resultMap, boolean isNested) {
     if (resultMap.getAutoMapping() != null) {
       return resultMap.getAutoMapping();
@@ -536,6 +541,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     List<UnMappedColumnAutoMapping> autoMapping = autoMappingsCache.get(mapKey);
     if (autoMapping == null) {
       autoMapping = new ArrayList<>();
+      //这里不需要担心嵌套映射,因为从rsw中获取的列都是sql返回的简单类型
       final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);
       for (String columnName : unmappedColumnNames) {
         String propertyName = columnName;
@@ -655,7 +661,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     final List<Object> constructorArgs = new ArrayList<>();
     Object resultObject = createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix);
     //一个映射对象结果对象就构建好了
-    //猜想 此处只构建对象不负责对象的属性映射
+    //此处只构建对象不负责对象的属性映射
     if (resultObject != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
       final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
       for (ResultMapping propertyMapping : propertyMappings) {
@@ -957,7 +963,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
     //这一块代码是干啥的
-    //Todo ？？
+    //防止递归进来的方法污染到变量,需要在方法退出时候将变量设为空吗？
     if (rowValue != null && mappedStatement.isResultOrdered() && shouldProcessMoreRows(resultContext, rowBounds)) {
       storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
       previousRowValue = null;
@@ -1094,6 +1100,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private void createRowKeyForMappedProperties(ResultMap resultMap, ResultSetWrapper rsw, CacheKey cacheKey, List<ResultMapping> resultMappings, String columnPrefix) throws SQLException {
     for (ResultMapping resultMapping : resultMappings) {
+      //只有简单的映射才参与计算,含有其他复杂（嵌套映射）的映射不参与cacheKey的计算
       if (resultMapping.isSimple()) {
         final String column = prependPrefix(resultMapping.getColumn(), columnPrefix);
         final TypeHandler<?> th = resultMapping.getTypeHandler();
