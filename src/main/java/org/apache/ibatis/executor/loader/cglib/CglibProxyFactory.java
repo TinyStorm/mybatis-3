@@ -139,8 +139,10 @@ public class CglibProxyFactory implements ProxyFactory {
           } else {
             if (lazyLoader.size() > 0 && !FINALIZE_METHOD.equals(methodName)) {
               if (aggressive || lazyLoadTriggerMethods.contains(methodName)) {
+                //如果触发了trigger方法,加载全部懒加载的字段
                 lazyLoader.loadAll();
               } else if (PropertyNamer.isSetter(methodName)) {
+                //如果是setter,则移除对应懒加载器 ResultLoader
                 final String property = PropertyNamer.methodToProperty(methodName);
                 lazyLoader.remove(property);
               } else if (PropertyNamer.isGetter(methodName)) {

@@ -660,15 +660,16 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     final List<Class<?>> constructorArgTypes = new ArrayList<>();
     final List<Object> constructorArgs = new ArrayList<>();
     Object resultObject = createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix);
-    //一个映射对象结果对象就构建好了
-    //此处只构建对象不负责对象的属性映射
+    //一个映射对象结果对象就构建好了,此处只构建对象不负责对象的属性映射
     if (resultObject != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
       final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
       for (ResultMapping propertyMapping : propertyMappings) {
         // issue gcode #109 && issue #149
         // 仅仅处理延迟加载代理的映射
         if (propertyMapping.getNestedQueryId() != null && propertyMapping.isLazy()) {
+          //原有的对象上封装一层代理对象,当调用非懒加载的属性getter时,正常返回,调用懒加载的属性的getter,调用ResultLoader.loadResult方法查询数据库
           resultObject = configuration.getProxyFactory().createProxy(resultObject, lazyLoader, configuration, objectFactory, constructorArgTypes, constructorArgs);
+          //这样不是处理一列懒加载吗
           break;
         }
       }

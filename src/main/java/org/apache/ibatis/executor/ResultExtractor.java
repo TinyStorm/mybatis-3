@@ -37,12 +37,15 @@ public class ResultExtractor {
   public Object extractObjectFromList(List<Object> list, Class<?> targetType) {
     Object value = null;
     if (targetType != null && targetType.isAssignableFrom(list.getClass())) {
+      //如果目标结果类型是List,则直接返回
       value = list;
     } else if (targetType != null && objectFactory.isCollection(targetType)) {
+      //如果目标类型是Collection的其他实现,则转为相应的集合返回
       value = objectFactory.create(targetType);
       MetaObject metaObject = configuration.newMetaObject(value);
       metaObject.addAll(list);
     } else if (targetType != null && targetType.isArray()) {
+      //如果结果类型是数组，则转为数组返回
       Class<?> arrayComponentType = targetType.getComponentType();
       Object array = Array.newInstance(arrayComponentType, list.size());
       if (arrayComponentType.isPrimitive()) {
@@ -54,6 +57,7 @@ public class ResultExtractor {
         value = list.toArray((Object[])array);
       }
     } else {
+      //其他情况认为是单个对象,取出其中第一个对象返回,如果由多个对象返回,则抛出异常
       if (list != null && list.size() > 1) {
         throw new ExecutorException("Statement returned more than one row, where no more than one was expected.");
       } else if (list != null && list.size() == 1) {
