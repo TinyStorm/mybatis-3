@@ -66,6 +66,10 @@ public class ResultLoader {
     this.creatorThreadId = Thread.currentThread().getId();
   }
 
+  /**
+   * 该方法最终会调用DefaultResultHandler,如果嵌套查询还有嵌套查询,则相当于递归
+   * @return 嵌套查询对象
+   */
   public Object loadResult() throws SQLException {
     List<Object> list = selectList();
     resultObject = resultExtractor.extractObjectFromList(list, targetType);

@@ -243,8 +243,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void resultMapElements(List<XNode> list) {
     for (XNode resultMapNode : list) {
       try {
-        ResultMap map = resultMapElement(resultMapNode);
-        System.out.println(map.getId());
+        resultMapElement(resultMapNode);
       } catch (IncompleteElementException e) {
         // ignore, it will be retried
       }
@@ -416,6 +415,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   /**
    * 构建匿名内嵌的映射
+   *
    * @param context        节点
    * @param resultMappings 额外的映射 仅仅当是case(甄别的子节点)的时候才会携带上级节点的resultMapping,一对一一对多都是从0开始
    * @param enclosingType  上一层的类型 association collection case 的 ofType或者javaType

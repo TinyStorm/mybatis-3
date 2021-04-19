@@ -53,4 +53,5 @@ public class SqlSourceBuilderTest {
     String shrankWhitespacesInSql = "SELECT * FROM user WHERE user_id = 1";
     Assertions.assertEquals(shrankWhitespacesInSql, actual);
   }
+
 }

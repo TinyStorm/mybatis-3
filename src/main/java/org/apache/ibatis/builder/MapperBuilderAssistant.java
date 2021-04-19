@@ -411,7 +411,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
   }
 
   /**
-   * build没个字段的映射
+   * build每一个字段的映射
    */
   public ResultMapping buildResultMapping(
       Class<?> resultType,
