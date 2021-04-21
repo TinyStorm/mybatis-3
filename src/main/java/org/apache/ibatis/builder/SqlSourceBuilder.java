@@ -84,7 +84,7 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
-      //读取到一个#{item}之后 将
+      //读取到一个#{item}之后 将#{item}整个替换成?,然后根据信息构建参数映射对象,并按照顺序放入集合,后面有ParameterHandler将根据参数映射集合将参数值SET到 statement 中
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }

@@ -34,6 +34,9 @@ public class SelectKeyGenerator implements KeyGenerator {
 
   public static final String SELECT_KEY_SUFFIX = "!selectKey";
   private final boolean executeBefore;
+  /**
+   * <selectKey></selectKey> 节点对应的MappedStatement,用于查询主键
+   */
   private final MappedStatement keyStatement;
 
   public SelectKeyGenerator(MappedStatement keyStatement, boolean executeBefore) {
@@ -44,6 +47,7 @@ public class SelectKeyGenerator implements KeyGenerator {
   @Override
   public void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
     if (executeBefore) {
+      //根据配置,决定是否执行(从数据库查询)
       processGeneratedKeys(executor, ms, parameter);
     }
   }
@@ -51,6 +55,7 @@ public class SelectKeyGenerator implements KeyGenerator {
   @Override
   public void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
     if (!executeBefore) {
+      //如果之前没有执行,则之后执行
       processGeneratedKeys(executor, ms, parameter);
     }
   }
@@ -93,10 +98,12 @@ public class SelectKeyGenerator implements KeyGenerator {
 
   private void handleMultipleProperties(String[] keyProperties,
       MetaObject metaParam, MetaObject metaResult) {
+    //
     String[] keyColumns = keyStatement.getKeyColumns();
-
+    //keyProperties为<selectKey>节点配置的keyProperties
     if (keyColumns == null || keyColumns.length == 0) {
       // no key columns specified, just use the property names
+      // 未配置columns 直接使用 properties
       for (String keyProperty : keyProperties) {
         setValue(metaParam, keyProperty, metaResult.getValue(keyProperty));
       }
@@ -104,6 +111,7 @@ public class SelectKeyGenerator implements KeyGenerator {
       if (keyColumns.length != keyProperties.length) {
         throw new ExecutorException("If SelectKey has key columns, the number must match the number of key properties.");
       }
+      //两个都配置了,就使用column作为参数的属性
       for (int i = 0; i < keyProperties.length; i++) {
         setValue(metaParam, keyProperties[i], metaResult.getValue(keyColumns[i]));
       }

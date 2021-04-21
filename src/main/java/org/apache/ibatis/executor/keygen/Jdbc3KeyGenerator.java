@@ -68,6 +68,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
 
   @Override
   public void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
+    //如果是带有自增主键的数据库,插入后会返回一个resultSet,该resultSet包含了插入记录的id
     processBatch(ms, stmt, parameter);
   }
 

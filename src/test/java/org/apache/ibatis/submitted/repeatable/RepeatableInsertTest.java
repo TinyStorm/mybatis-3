@@ -92,7 +92,7 @@ class RepeatableInsertTest {
       int count = mapper.count();
       User newUser = new User();
       newUser.setName("Test");
-      mapper.insertUser(newUser);
+      mapper.insertNamedUser(newUser);
 
       User user = mapper.getUser(newUser.getId());
       Assertions.assertEquals(Integer.valueOf(count + 1001), user.getId());
