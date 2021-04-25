@@ -87,7 +87,6 @@ public class LruCache implements Cache {
   private void cycleKeyList(Object key) {
     keyMap.put(key, key);
     if (eldestKey != null) {
-      //存在被连续更新的可能吗?
       delegate.removeObject(eldestKey);
       eldestKey = null;
     }

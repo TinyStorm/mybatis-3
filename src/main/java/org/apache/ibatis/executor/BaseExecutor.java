@@ -144,6 +144,7 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
+      //select节点配置的 flushCache属性
       clearLocalCache();
     }
     List<E> list;
@@ -153,12 +154,16 @@ public abstract class BaseExecutor implements Executor {
       if (list != null) {
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
+        //该步骤会查询数据库并调用resultSetHandler处理结果
+        //当有嵌套查询(非lazy)时候,会有内存查询进入此方法,相当于递归,此时queryStack会大于等于2,依次判断是否是嵌套查询
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }
     } finally {
       queryStack--;
     }
     if (queryStack == 0) {
+      //当queryStack为0时候,表示主查询已经加载完成
+      //从缓存中把尚未完全加载的缓存加载出来并set到对象中
       for (DeferredLoad deferredLoad : deferredLoads) {
         deferredLoad.load();
       }
@@ -166,6 +171,7 @@ public abstract class BaseExecutor implements Executor {
       deferredLoads.clear();
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
+        //如果缓存周期为语句(statement)级别,执行完就清除缓存
         clearLocalCache();
       }
     }
@@ -187,6 +193,7 @@ public abstract class BaseExecutor implements Executor {
     if (deferredLoad.canLoad()) {
       deferredLoad.load();
     } else {
+      //缓存中已经有占位符,但是还没有加载完
       deferredLoads.add(new DeferredLoad(resultObject, property, key, localCache, configuration, targetType));
     }
   }

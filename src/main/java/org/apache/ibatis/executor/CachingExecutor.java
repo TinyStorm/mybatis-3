@@ -92,6 +92,7 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
+    //该cache在加载namespace时候根据配置创建的
     Cache cache = ms.getCache();
     if (cache != null) {
       flushCacheIfRequired(ms);

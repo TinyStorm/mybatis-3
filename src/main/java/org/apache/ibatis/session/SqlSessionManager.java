@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2019 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.session;
 
@@ -35,16 +35,25 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   private final SqlSessionFactory sqlSessionFactory;
+  /**
+   * sqlSession代理对象,
+   * 调用SqlSession的方法会进入SqlSessionInterceptor代理处理器中,
+   * 该处理器的逻辑为
+   * 先从ThreadLocal中尝试获取,如果获取到则直接使用此Session执行方法
+   * 否则调用openSession创建session,执行方法后并且关闭session
+   * 想要TheadLocal中含有session,需要调用startManagedSession为本线程创建session对象
+   */
   private final SqlSession sqlSessionProxy;
 
+  //保存当前线程的真实的sqlSession对象
   private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
 
   private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
-        SqlSessionFactory.class.getClassLoader(),
-        new Class[]{SqlSession.class},
-        new SqlSessionInterceptor());
+      SqlSessionFactory.class.getClassLoader(),
+      new Class[]{SqlSession.class},
+      new SqlSessionInterceptor());
   }
 
   public static SqlSessionManager newInstance(Reader reader) {
@@ -261,6 +270,10 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
     return getConfiguration().getMapper(type, this);
   }
 
+  /*
+   * 下面几个方法不能直接调用代理对象,因为这几种方法需要判断当前线程是否含有session,如果没有则抛出异常,而不是创建新的session,这样没有意义
+   */
+
   @Override
   public Connection getConnection() {
     final SqlSession sqlSession = localSqlSession.get();
@@ -339,7 +352,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   private class SqlSessionInterceptor implements InvocationHandler {
     public SqlSessionInterceptor() {
-        // Prevent Synthetic Access
+      // Prevent Synthetic Access
     }
 
     @Override

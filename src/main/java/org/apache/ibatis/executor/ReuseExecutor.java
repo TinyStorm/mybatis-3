@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2020 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2020 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.executor;
 
@@ -60,6 +60,16 @@ public class ReuseExecutor extends BaseExecutor {
     return handler.query(stmt, resultHandler);
   }
 
+  /**
+   * 该方法可能导致的两个问题
+   *
+   * 1.一个statement对象只能同时具有一次查询的结果集ResultSet,当使用queryCursor时,返回的cursor遍历时候是依赖ResultSet的,也就是依赖statement对象的,
+   * 当再次调用同样的方法,ReuseExecutor会复用上一次使用的statement对象,此时上一次未遍历完的cursor将失效,继续遍历甚至会报错
+   * 2.当遍历cursor时候,调用fetchNextObjectFromDatabase()时,该方法内部会判断是否遍历到结果集的最后一条,或者是否达到limit,
+   * 如果满足条件,则关闭resultSet对象,resultSet.close()内部还会调用statement.close()方法,这就导致statement对象不可用,当再次使用
+   * 时候会有npe抛出
+   * 以上两个问题,query不会出现,resultSetHandle方法handleRow方法也不会关闭resultSet对象,因为可能有多结果集的情况,不能擅自关闭
+   * */
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException {
     Configuration configuration = ms.getConfiguration();

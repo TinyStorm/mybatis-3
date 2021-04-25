@@ -82,6 +82,7 @@ public class ResultLoader {
       localExecutor = newExecutor();
     }
     try {
+      //如果还有内部查询,则走相似流程
       return localExecutor.query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER, cacheKey, boundSql);
     } finally {
       if (localExecutor != executor) {

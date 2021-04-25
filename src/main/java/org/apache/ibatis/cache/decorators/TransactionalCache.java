@@ -25,6 +25,9 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
+ * 二级缓存的事务缓存装饰器
+ * 当接口设置了二级缓存时候,newExecutor时候会封装一层CacheExecutor,CacheExecutor会使用TransactionCacheManager操作缓存
+ * TransactionCacheManager操作缓存Cache时候,会加装一层装饰器(TransactionalCache),通过该缓存来访问底层的缓存对象
  * The 2nd level cache transactional buffer.
  * <p>
  * This class holds all cache entries that are to be added to the 2nd level cache during a Session.

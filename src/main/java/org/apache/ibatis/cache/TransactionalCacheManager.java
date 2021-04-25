@@ -21,10 +21,13 @@ import java.util.Map;
 import org.apache.ibatis.cache.decorators.TransactionalCache;
 
 /**
+ * 和Executor,session一对一
  * @author Clinton Begin
  */
 public class TransactionalCacheManager {
-
+  /**
+   * 保存了CacheExecutor所操作过的缓存对象 一般一个或多个(cache-ref)接口(namespace)使用缓存对象
+   */
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {

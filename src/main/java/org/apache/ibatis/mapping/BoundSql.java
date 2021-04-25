@@ -42,7 +42,6 @@ public class BoundSql {
    */
   private final Object parameterObject;
   /**
-   * 这个参数到底是干啥的
    * 动态节点可能会生成一些额外的参数 比如foreach节点会生成 __frch_item_0..这样的参数
    */
   private final Map<String, Object> additionalParameters;
